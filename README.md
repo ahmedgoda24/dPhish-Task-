@@ -18,7 +18,9 @@ cd dphish-task
 ```
 
 ### ⚙️ Configure Environment Variables
-Create the following files inside a `.envs` directory:
+if i dont added environment variables
+Create a .env and .env.backend.dev files in the project's root directory
+adn Use the .env-templates to fill in the required values.
 - `.env`
 - `.env.backend.dev`
 

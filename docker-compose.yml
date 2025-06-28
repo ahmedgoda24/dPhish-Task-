@@ -92,8 +92,8 @@ services:
       - "5555:5555"
       # -"${FLOWER_DEV_PORT}:${FLOWER_DEV_PORT}"
     env_file:
-      - .envs/.env
-      - .envs/.env.backend.dev
+      - .env
+      - .env.backend.dev
       # - .env
       # - .env.backend.dev
     depends_on:

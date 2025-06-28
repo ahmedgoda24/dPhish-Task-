@@ -1,25 +1,3 @@
-# # setup server 
-
-# # 1 : start docker kernal + python
-# FROM python:3.11-slim-bullseye
-
-# # 2 : ENV : show logs
-# ENV PYTHONUNBUFFERED=1
-
-# # 3 : update kernal + install dep
-# RUN apt-get update && apt-get -y install gcc libpq-dev
-
-# # 4: create project folder : kernal
-# WORKDIR /app
-
-# # 5: Copy requi
-# COPY requirements.txt /app/requirements.txt
-
-# # 6: install req
-# RUN pip install -r /app/requirements.txt
-
-# # 7: copy project code --> docker 
-# COPY . /app/
 FROM python:3.13.3-slim-bullseye AS builder
 
 ENV PYTHONUNBUFFERED=1
@@ -69,14 +47,7 @@ COPY . /app/backend
 
 EXPOSE $PORT
 
-# CMD ["sh", "-c", "find . -path '*/__pycache__/*pyc' -delete \
-#     && find . -path '*/__pycache__' -delete \
-#     && python manage.py collectstatic --noinput || echo '[!] Failed to collect static files!\n' \
-#     && python manage.py check || echo '[!] Failed to check database!\n' \
-#     && python manage.py makemigrations --noinput || echo '[!] Failed to make migrations!\n' \
-#     && python manage.py migrate --noinput || echo '[!] Failed to migrate database!\n' \
-#     && uvicorn project.asgi:application --host 0.0.0.0 --port ${PORT:-8000} --reload "]
-    # && gunicorn project.wsgi:application -b 0.0.0.0:${PORT} --reload
+
     CMD ["sh", "-c", "find . -path '*/__pycache__/*pyc' -delete 2>/dev/null || true \
     && find . -path '*/__pycache__' -delete 2>/dev/null || true \
     && python manage.py collectstatic --noinput || echo '[!] Failed to collect static files!' \
