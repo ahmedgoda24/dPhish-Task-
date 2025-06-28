@@ -1,0 +1,12 @@
+# Versioning and metadata
+.git
+.gitignore
+.dockerignore
+
+# Environment variables
+*.env*
+
+# External Environment setups
+.venv/
+*.egg-info/
+dist/

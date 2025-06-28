@@ -1,0 +1,114 @@
+
+name: dphish_dev
+
+services:
+
+  postgres_db_dev:
+    image: postgres:17.4-alpine
+    restart: always
+    user: postgres
+    ports:
+      - '${POSTGRES_EXPOSED_DEV_PORT}:5432'
+    volumes:
+      - ./postgresql:/docker-entrypoint-initdb.d/
+      - postgres_dev_da:/var/lib/postgresql/data/
+    env_file:
+      - .env
+      - .env.backend.dev
+    networks:
+      - development-network
+
+  redis_dev:
+    image: redis:7.4.3-alpine
+    restart: always
+    ports:
+      - '${REDIS_EXPOSED_DEV_PORT}:6379'
+    volumes:
+      - redis_dev_da:/data
+    env_file:
+      - .env
+      - .env.backend.dev
+    networks:
+      - development-network
+
+  django_dev:
+    image: dphish-django-dev
+    pull_policy: never
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        - PORT=${BACKEND_DEV_PORT}
+    restart: always
+    volumes:
+      - ./backend:/app/backend
+    # expose:
+      # - ${BACKEND_DEV_PORT}
+    ports:
+      # - "8000:8000"
+      - "${BACKEND_DEV_PORT}:${BACKEND_DEV_PORT}"
+    env_file:
+      - .env
+      - .env.backend.dev
+    environment:
+      - PORT=${BACKEND_DEV_PORT}
+    depends_on:
+      - postgres_db_dev
+    links:
+      - postgres_db_dev:postgres_db
+      - redis_dev:redis
+    networks:
+      - development-network
+
+  celery_dev:
+    image: dphish-django-dev
+    pull_policy: never
+    command: celery -A project worker -B -l info
+    restart: always
+    volumes:
+      - ./backend:/app/backend
+    env_file:
+      - .env
+      - .env.backend.dev
+    depends_on:
+      - django_dev
+      - redis_dev
+    links:
+      - postgres_db_dev:postgres_db
+      - django_dev:django
+      - redis_dev:redis
+    networks:
+      - development-network
+
+  flower_dev:
+    image: mher/flower:2.0.1
+    command: celery flower --port=${FLOWER_DEV_PORT} --basic_auth=${FLOWER_USER}:${FLOWER_PASSWORD}
+    restart: always
+    volumes:
+      - flower_dev_da:/data
+    # expose:
+    #   - ${FLOWER_DEV_PORT}
+    ports:
+      - "5555:5555"
+      # -"${FLOWER_DEV_PORT}:${FLOWER_DEV_PORT}"
+    env_file:
+      - .env
+      - .env.backend.dev
+    depends_on:
+      - redis_dev
+    links:
+      - redis_dev:redis
+    networks:
+      - development-network
+
+
+networks:
+  development-network:
+    name: dphish_developmentnetwork
+    driver: bridge
+
+
+volumes:
+  postgres_dev_da:
+  redis_dev_da:
+  flower_dev_da:
